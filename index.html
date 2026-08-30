@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Redirecting...</title>
+</head>
+<body>
+  <p>Redirecting...</p>
+
+  <script>
+    const codes = [
+      { end: "2026-09-01", code: "RZGRP3Q" },
+      { end: "2026-09-08", code: "2PEV74W" },
+      { end: "2026-09-15", code: "QMZRNJN" },
+      { end: "2026-09-22", code: "DWV63G4" },
+      { end: "2026-09-29", code: "4ZJ67XX" },
+      { end: "2026-10-06", code: "GX6NP4Q" },
+      { end: "2026-10-13", code: "NMNRJWP" },
+      { end: "2026-10-20", code: "PP8R6VY" },
+      { end: "2026-10-27", code: "86GZ2XG" },
+      { end: "2026-11-03", code: "ZQ7V3YZ" },
+      { end: "2026-11-10", code: "YE5VJZR" },
+      { end: "2026-11-17", code: "W23YEPX" },
+      { end: "2026-11-24", code: "7G587NE" },
+      { end: "2026-12-01", code: "M72RVZ7" }
+    ];
+
+    // Use UTC so everyone gets the same code at the same moment.
+    const today = new Date();
+    const todayUTC = new Date(Date.UTC(
+      today.getUTCFullYear(),
+      today.getUTCMonth(),
+      today.getUTCDate()
+    ));
+
+    let selectedCode = null;
+
+    for (const entry of codes) {
+      const endDate = new Date(entry.end + "T23:59:59Z");
+
+      if (todayUTC <= endDate) {
+        selectedCode = entry.code;
+        break;
+      }
+    }
+
+    if (selectedCode) {
+      const destination =
+        "https://magic.wizards.com/en/products/companion-app?shortCode=" +
+        encodeURIComponent(selectedCode);
+
+      window.location.replace(destination);
+    } else {
+      document.body.innerHTML =
+        "<p>No redirect code is currently configured for this date.</p>";
+    }
+  </script>
+</body>
+</html>
