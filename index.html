@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Magic Companion Event</title>
+  <title>Modernligan - Event Code</title>
 
   <style>
     body {
@@ -60,6 +60,12 @@
     .event-date-value {
       font-size: 20px;
       font-weight: 600;
+    }
+
+    .today-date {
+      margin-top: 6px;
+      color: #777;
+      font-size: 13px;
     }
 
     .open-button {
@@ -143,12 +149,6 @@
     .error {
       color: #b00020;
     }
-
-    .diagnostic {
-      margin-top: 24px;
-      color: #999;
-      font-size: 11px;
-    }
   </style>
 </head>
 
@@ -156,13 +156,14 @@
 
   <main class="container">
 
-    <h1>Magic Companion</h1>
+    <h1>Modernligan - Event Code</h1>
 
     <p class="description">
-      Open today's event in the Magic Companion app.
+      A dynamic site for the Companion event code
     </p>
 
     <div class="event-date">
+
       <div class="event-date-label">
         Event date
       </div>
@@ -173,6 +174,14 @@
       >
         Loading...
       </div>
+
+      <div
+        id="todayDate"
+        class="today-date"
+      >
+        Loading...
+      </div>
+
     </div>
 
     <a
@@ -180,13 +189,13 @@
       class="open-button"
       href="#"
     >
-      Try to open in App
+      Loading...
     </a>
 
     <div class="code-section">
 
       <div class="code-label">
-        Today's event code
+        Raw event code
       </div>
 
       <div class="code-row">
@@ -213,13 +222,6 @@
         class="copy-message"
       ></div>
 
-    </div>
-
-    <div
-      id="diagnostic"
-      class="diagnostic"
-    >
-      Initializing...
     </div>
 
   </main>
@@ -256,6 +258,9 @@
     const eventDateElement =
       document.getElementById("eventDate");
 
+    const todayDateElement =
+      document.getElementById("todayDate");
+
     const eventCodeElement =
       document.getElementById("eventCode");
 
@@ -268,8 +273,32 @@
     const copyMessage =
       document.getElementById("copyMessage");
 
-    const diagnostic =
-      document.getElementById("diagnostic");
+
+    // ============================================================
+    // DATE FORMATTING
+    // ============================================================
+
+    function formatDateWithDay(date) {
+
+      const year =
+        date.getFullYear();
+
+      const month =
+        String(date.getMonth() + 1).padStart(2, "0");
+
+      const day =
+        String(date.getDate()).padStart(2, "0");
+
+      const dayName =
+        date.toLocaleDateString(
+          undefined,
+          {
+            weekday: "long"
+          }
+        );
+
+      return `${year}-${month}-${day}, ${dayName}`;
+    }
 
 
     // ============================================================
@@ -284,6 +313,21 @@
           now.getUTCFullYear(),
           now.getUTCMonth(),
           now.getUTCDate()
+        )
+      );
+
+
+    // ============================================================
+    // DISPLAY TODAY'S DATE
+    // ============================================================
+
+    todayDateElement.textContent =
+      "Today is: " +
+      formatDateWithDay(
+        new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate()
         )
       );
 
@@ -333,15 +377,14 @@
 
 
       // ----------------------------------------------------------
-      // Set button destination
-      //
-      // IMPORTANT:
-      // This is a real <a href=""> link rather than
-      // window.location.replace().
+      // Set button destination and text
       // ----------------------------------------------------------
 
       openAppButton.href =
         destination;
+
+      openAppButton.textContent =
+        "Join " + code + " in the Companion App";
 
 
       // ----------------------------------------------------------
@@ -378,13 +421,8 @@
 
 
       eventDateElement.textContent =
-        displayDate.toLocaleDateString(
-          undefined,
-          {
-            year: "numeric",
-            month: "long",
-            day: "numeric"
-          }
+        formatDateWithDay(
+          displayDate
         );
 
 
@@ -485,16 +523,6 @@
       );
 
 
-      // ----------------------------------------------------------
-      // Diagnostic
-      //
-      // This lets us immediately see that JavaScript executed.
-      // ----------------------------------------------------------
-
-      diagnostic.textContent =
-        "Ready • Code: " + code;
-
-
     } else {
 
       // ==========================================================
@@ -513,10 +541,10 @@
       copyButton.style.display =
         "none";
 
-      diagnostic.textContent =
+      copyMessage.textContent =
         "No event code is configured for today.";
 
-      diagnostic.classList.add(
+      copyMessage.classList.add(
         "error"
       );
     }
