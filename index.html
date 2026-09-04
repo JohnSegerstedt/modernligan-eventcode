@@ -3,10 +3,202 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Redirecting...</title>
+
+  <title>Magic Companion Event</title>
+
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                   Helvetica, Arial, sans-serif;
+      background: #f5f5f5;
+      color: #222;
+    }
+
+    .container {
+      width: calc(100% - 40px);
+      max-width: 420px;
+      padding: 32px 24px;
+      box-sizing: border-box;
+      text-align: center;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: 24px;
+    }
+
+    .description {
+      margin: 0 0 24px;
+      color: #666;
+      line-height: 1.5;
+    }
+
+    .event-date {
+      margin-bottom: 28px;
+    }
+
+    .event-date-label {
+      margin-bottom: 5px;
+      font-size: 13px;
+      color: #777;
+    }
+
+    .event-date-value {
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .open-button {
+      display: inline-block;
+      width: 100%;
+      padding: 14px 20px;
+      box-sizing: border-box;
+      border: none;
+      border-radius: 10px;
+      background: #1677ff;
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s ease, transform 0.05s ease;
+    }
+
+    .open-button:hover {
+      background: #0d63d8;
+    }
+
+    .open-button:active {
+      transform: scale(0.98);
+    }
+
+    .code-section {
+      margin-top: 28px;
+      padding-top: 24px;
+      border-top: 1px solid #e5e5e5;
+    }
+
+    .code-label {
+      margin-bottom: 8px;
+      font-size: 13px;
+      color: #777;
+    }
+
+    .code-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .code {
+      padding: 8px 10px;
+      background: #f1f1f1;
+      border-radius: 7px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco,
+                   Consolas, "Liberation Mono", monospace;
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    .copy-button {
+      padding: 8px 10px;
+      border: 1px solid #d5d5d5;
+      border-radius: 7px;
+      background: #fff;
+      color: #333;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .copy-button:hover {
+      background: #f5f5f5;
+    }
+
+    .copy-button:active {
+      background: #eaeaea;
+    }
+
+    .message {
+      margin-top: 16px;
+      font-size: 13px;
+      color: #777;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
 </head>
+
 <body>
-  <p>Redirecting...</p>
+
+  <main class="container">
+
+    <h1>Magic Companion</h1>
+
+    <p class="description">
+      Open today's event in the Magic Companion app.
+    </p>
+
+    <!-- Event date -->
+    <section class="event-date">
+      <div class="event-date-label">
+        Event date
+      </div>
+
+      <div id="eventDate" class="event-date-value"></div>
+    </section>
+
+    <!-- Open in App button -->
+    <a
+      id="openAppButton"
+      class="open-button"
+      href="#"
+    >
+      Try to open in App
+    </a>
+
+    <!-- Event code -->
+    <section id="codeSection" class="code-section">
+
+      <div class="code-label">
+        Today's event code
+      </div>
+
+      <div class="code-row">
+
+        <span id="eventCode" class="code"></span>
+
+        <button
+          id="copyButton"
+          class="copy-button"
+          type="button"
+        >
+          Copy
+        </button>
+
+      </div>
+
+      <div id="copyMessage" class="message"></div>
+
+    </section>
+
+    <!-- Error state -->
+    <p id="errorMessage" class="message hidden">
+      No event code is currently configured for this date.
+    </p>
+
+  </main>
 
   <script>
     const codes = [
@@ -26,35 +218,53 @@
       { end: "2026-12-01", code: "M72RVZ7" }
     ];
 
-    // Use UTC so everyone gets the same code at the same moment.
+    /*
+     * Use UTC so everyone gets the same code
+     * at the same moment.
+     */
     const today = new Date();
+
     const todayUTC = new Date(Date.UTC(
       today.getUTCFullYear(),
       today.getUTCMonth(),
       today.getUTCDate()
     ));
 
-    let selectedCode = null;
+    let selectedEntry = null;
 
     for (const entry of codes) {
       const endDate = new Date(entry.end + "T23:59:59Z");
 
       if (todayUTC <= endDate) {
-        selectedCode = entry.code;
+        selectedEntry = entry;
         break;
       }
     }
 
-    if (selectedCode) {
+    const openAppButton = document.getElementById("openAppButton");
+    const eventCode = document.getElementById("eventCode");
+    const eventDate = document.getElementById("eventDate");
+    const copyButton = document.getElementById("copyButton");
+    const copyMessage = document.getElementById("copyMessage");
+    const codeSection = document.getElementById("codeSection");
+    const errorMessage = document.getElementById("errorMessage");
+
+    if (selectedEntry) {
+
+      const selectedCode = selectedEntry.code;
+
       const destination =
         "https://magic.wizards.com/en/products/companion-app?shortCode=" +
         encodeURIComponent(selectedCode);
 
-      window.location.replace(destination);
-    } else {
-      document.body.innerHTML =
-        "<p>No redirect code is currently configured for this date.</p>";
-    }
-  </script>
-</body>
-</html>
+      /*
+       * Set the destination as the href of a real <a> element.
+       * This allows the user to activate the link normally.
+       */
+      openAppButton.href = destination;
+
+      /*
+       * Display the event date.
+       *
+       * Convert YYYY-MM-DD to a human-readable date without
+       *
